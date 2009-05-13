@@ -25,24 +25,28 @@ The library evolves around a delayed_jobs table which looks as follows:
     table.datetime :locked_at                    # Set when a client is working on this object
     table.datetime :failed_at                    # Set when all retries have failed (actually, by default, the record is deleted instead)
     table.string   :locked_by                    # Who is working on this object (if locked)
+    table.datetime :finished_at			 # Used for statiscics / monitoring
     table.timestamps
   end
 
 On failure, the job is scheduled again in 5 seconds + N ** 4, where N is the number of retries.
 
-The default MAX_ATTEMPTS is 25. After this, the job either deleted (default), or left in the database with "failed_at" set.
+The default MAX_ATTEMPTS is 25. After this, the job is either deleted (default), or left in the database with "failed_at" set.
 With the default of 25 attempts, the last retry will be 20 days later, with the last interval being almost 100 hours.
 
 The default MAX_RUN_TIME is 4.hours. If your job takes longer than that, another computer could pick it up. It's up to you to
 make sure your job doesn't exceed this time. You should set this to the longest time you think the job could take.
 
-By default, it will delete failed jobs (and it always deletes successful jobs). If you want to keep failed jobs, set
-Delayed::Job.destroy_failed_jobs = false. The failed jobs will be marked with non-null failed_at.
+By default, it will delete failed jobs. If you want to keep failed jobs, set
+@Delayed::Job.destroy_failed_jobs = false@. The failed jobs will be marked with non-null failed_at.
+
+Same thing for successful jobs. They're deleted by default and, to keep them, set @Delayed::Job.destroy_successful_jobs = false@. They will be marked with finished_at. This is useful for gathering statistics like how long jobs took between entering the queue (created_at) and being finished (finished_at).
 
 Here is an example of changing job parameters in Rails:
 
   # config/initializers/delayed_job_config.rb
   Delayed::Job.destroy_failed_jobs = false
+  Delayed::Job.destroy_successful_jobs = false
   silence_warnings do
     Delayed::Job.const_set("MAX_ATTEMPTS", 3)
     Delayed::Job.const_set("MAX_RUN_TIME", 5.minutes)
