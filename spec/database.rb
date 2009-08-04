@@ -7,8 +7,10 @@ gem 'sqlite3-ruby'
 
 require File.dirname(__FILE__) + '/../init'
 require 'spec'
-  
-ActiveRecord::Base.logger = Logger.new('/tmp/dj.log')
+
+logger = Logger.new('/tmp/dj.log')
+ActiveRecord::Base.logger = logger
+Delayed::Worker.logger = logger
 ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => '/tmp/jobs.sqlite')
 ActiveRecord::Migration.verbose = false
 
