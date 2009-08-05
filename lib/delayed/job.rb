@@ -35,9 +35,10 @@ module Delayed
 
     ParseObjectFromYaml = /\!ruby\/\w+\:([^\s]+)/
 
-    cattr_accessor :min_priority, :max_priority
+    cattr_accessor :min_priority, :max_priority, :job_types
     self.min_priority = nil
     self.max_priority = nil
+    self.job_types    = nil
 
     # When a worker is exiting, make sure we don't have any locked jobs.
     def self.clear_locks!
@@ -65,7 +66,8 @@ module Delayed
     end
 
     def payload_object=(object)
-      self['handler'] = object.to_yaml
+      self['job_type'] = object.class.to_s
+      self['handler']  = object.to_yaml
     end
 
     # Reschedule the job in the future (when a job fails).
@@ -142,6 +144,11 @@ module Delayed
       if self.max_priority
         sql << ' AND (priority <= ?)'
         conditions << max_priority
+      end
+
+      if self.job_types
+        sql << ' AND (job_type IN (?))'
+        conditions << job_types
       end
 
       conditions.unshift(sql)

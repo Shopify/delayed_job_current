@@ -77,8 +77,43 @@ describe Delayed::Job do
 
     SimpleJob.runs.should == 1
   end
-                     
-                     
+
+  it "should work on specified job types" do
+    SimpleJob.runs.should == 0
+
+    Delayed::Job.job_types = "SimpleJob"
+    Delayed::Job.enqueue SimpleJob.new
+    Delayed::Job.work_off
+
+    SimpleJob.runs.should == 1
+
+    Delayed::Job.job_types = nil
+  end
+
+  it "should not work on unspecified job types" do
+    SimpleJob.runs.should == 0
+
+    Delayed::Job.job_types = "AnotherJob"
+    Delayed::Job.enqueue SimpleJob.new
+    Delayed::Job.work_off
+
+    SimpleJob.runs.should == 0
+
+    Delayed::Job.job_types = nil
+  end
+
+  it "should work on specified job types even when it's a list" do
+    SimpleJob.runs.should == 0
+
+    Delayed::Job.job_types = %w( Whatever SimpleJob )
+    Delayed::Job.enqueue SimpleJob.new
+    Delayed::Job.work_off
+
+    SimpleJob.runs.should == 1
+
+    Delayed::Job.job_types = nil
+  end
+
   it "should work with eval jobs" do
     $eval_job_ran = false
 
