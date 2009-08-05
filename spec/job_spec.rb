@@ -5,10 +5,18 @@ class SimpleJob
   def perform; @@runs += 1; end
 end
 
+class CustomJob < SimpleJob
+  def max_attempts; 3; end
+end
+
 class ErrorJob
   cattr_accessor :runs; self.runs = 0
   def perform; raise 'did not work'; end
 end             
+
+class LongRunningJob
+  def perform; sleep 250; end
+end
 
 module M
   class ModuleJob
@@ -142,7 +150,7 @@ describe Delayed::Job do
     job = Delayed::Job.find(:first)
 
     job.last_error.should =~ /did not work/
-    job.last_error.should =~ /job_spec.rb:10:in `perform'/
+    job.last_error.should =~ /job_spec.rb:14:in `perform'/
     job.attempts.should == 1
 
     job.run_at.should > Delayed::Job.db_time_now - 10.minutes
@@ -211,6 +219,24 @@ describe Delayed::Job do
     @job.reschedule 'FAIL'
 
     Delayed::Job.destroy_failed_jobs = default
+  end
+
+  it "should allow jobs to override max_attemps and behave appropriately" do
+    default = Delayed::Job.destroy_failed_jobs
+    Delayed::Job.destroy_failed_jobs = true
+
+    @job = Delayed::Job.create :payload_object => CustomJob.new, :attempts => 5
+    @job.should_receive(:destroy)
+    @job.reschedule 'FAIL'
+
+    Delayed::Job.destroy_failed_jobs = default
+  end
+
+  it "should fail after MAX_RUN_TIME" do
+    @job = Delayed::Job.create :payload_object => LongRunningJob.new
+    Delayed::Job.reserve_and_run_one_job(1.second)
+    @job.reload.last_error.should =~ /expired/
+    @job.attempts.should == 1
   end
 
   it "should never find failed jobs" do

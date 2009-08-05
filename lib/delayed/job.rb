@@ -1,3 +1,5 @@
+require 'timeout'
+
 module Delayed
 
   class DeserializationError < StandardError
@@ -69,7 +71,7 @@ module Delayed
     # Reschedule the job in the future (when a job fails).
     # Uses an exponential scale depending on the number of failed attempts.
     def reschedule(message, backtrace = [], time = nil)
-      if self.attempts < MAX_ATTEMPTS
+      if self.attempts < (payload_object.send(:max_attempts) rescue MAX_ATTEMPTS)
         time ||= Job.db_time_now + (attempts ** 4) + 5
 
         self.attempts    += 1
@@ -95,12 +97,11 @@ module Delayed
 
       begin
         runtime =  Benchmark.realtime do
-          invoke_job # TODO: raise error if takes longer than max_run_time
+          Timeout.timeout(max_run_time.to_i) { invoke_job }
         end
         destroy_successful_jobs ? destroy :
           update_attribute(:finished_at, Time.now)
-        # TODO: warn if runtime > max_run_time ?
-        Delayed::Worker.logger.info "* [JOB] #{name} completed after %.4f" % runtime
+        Delayed::Worker.logger.info "* [JOB] #{name} completed after %.4f" % runtime        
         return true  # did work
       rescue Exception => e
         reschedule e.message, e.backtrace
