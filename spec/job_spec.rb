@@ -261,6 +261,13 @@ describe Delayed::Job do
     @job.attempts.should == 1
   end
 
+  it "should find high priority jobs first" do
+    @job_10 = Delayed::Job.create :payload_object => SimpleJob.new, :priority => 10
+    @job_20 = Delayed::Job.create :payload_object => SimpleJob.new, :priority => 20
+
+    Delayed::Job.find_available( :limit => 1 ).first.should == @job_20
+  end
+
   it "should never find failed jobs" do
     @job = Delayed::Job.create :payload_object => SimpleJob.new, :attempts => 50, :failed_at => Time.now
     Delayed::Job.find_available( :limit => 1 ).length.should == 0
