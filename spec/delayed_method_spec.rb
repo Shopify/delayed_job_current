@@ -80,6 +80,14 @@ describe 'random ruby objects' do
     Delayed::Job.unfinished.count.should == 0
   end
 
+  it "should store the job type properly when its an normal class" do
+    story = Story.create :text => 'Once upon...'
+    story.send_later :tell
+
+    job = Delayed::Job.first
+    job.job_type.should == "Story#tell"
+  end
+
   it "should store the object as string if its an active record" do
     story = Story.create :text => 'Once upon...'
     story.send_later(:tell)

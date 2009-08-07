@@ -143,7 +143,12 @@ module Delayed
     end
 
     def payload_object=(object)
-      self['job_type'] = object.class.to_s
+      job_type = if object.respond_to? :job_type
+        object.job_type
+      else
+        object.class.to_s
+      end
+      self['job_type'] = job_type
       self['handler']  = object.to_yaml
     end
 

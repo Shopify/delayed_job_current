@@ -12,7 +12,7 @@ end
 class ErrorJob
   cattr_accessor :runs; self.runs = 0
   def perform; raise 'did not work'; end
-end             
+end
 
 class LongRunningJob
   def perform; sleep 250; end
@@ -72,6 +72,19 @@ describe Delayed::Job do
     Delayed::Job.work_off
 
     SimpleJob.runs.should == 1
+  end
+
+  it "should work on specified job types for common objects" do
+    Delayed::Job.unfinished.should have(0).jobs
+    Delayed::Job.finished.should have(0).jobs
+
+    "a string".send_later :size
+    Delayed::Job.unfinished.should have(1).jobs
+    Delayed::Job.finished.should have(0).jobs
+
+    Delayed::Job.work_off :job_types => "String#size"
+    Delayed::Job.unfinished.should have(0).jobs
+    Delayed::Job.finished.should have(1).job
   end
 
   it "should work on specified job types" do
