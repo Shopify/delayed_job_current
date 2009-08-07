@@ -22,28 +22,107 @@ module Delayed
     # If you want to keep them around (for statistics/monitoring),
     # set this to false.
     cattr_accessor :destroy_successful_jobs
-    self.destroy_successful_jobs = true
-
-    # Every worker has a unique name which by default is the pid of the process.
-    # There are some advantages to overriding this with something which survives worker retarts:
-    # Workers can safely resume working on tasks which are locked by themselves. The worker will assume that it crashed before.
-    cattr_accessor :worker_name
-    self.worker_name = "host:#{Socket.gethostname} pid:#{Process.pid}" rescue "pid:#{Process.pid}"
+    self.destroy_successful_jobs = false
 
     NextTaskSQL         = '(run_at <= ? AND (locked_at IS NULL OR locked_at < ?) OR (locked_by = ?)) AND failed_at IS NULL AND finished_at IS NULL'
     NextTaskOrder       = 'priority DESC, run_at ASC'
 
     ParseObjectFromYaml = /\!ruby\/\w+\:([^\s]+)/
 
-    cattr_accessor :min_priority, :max_priority, :job_types
-    self.min_priority = nil
-    self.max_priority = nil
-    self.job_types    = nil
+    named_scope :unfinished, :conditions => { :finished_at => nil }
+    named_scope :finished,   :conditions => [ "finished_at IS NOT NULL" ]
 
-    # When a worker is exiting, make sure we don't have any locked jobs.
-    def self.clear_locks!
-      update_all("locked_by = null, locked_at = null", ["locked_by = ?", worker_name])
-    end
+    class << self
+      # When a worker is exiting, make sure we don't have any locked jobs.
+      def clear_locks!( worker_name )
+        update_all("locked_by = null, locked_at = null", ["locked_by = ?", worker_name])
+      end
+
+      # Add a job to the queue
+      def enqueue(*args, &block)
+        object = block_given? ? EvaledJob.new(&block) : args.shift
+
+        unless object.respond_to?(:perform) || block_given?
+          raise ArgumentError, 'Cannot enqueue items which do not respond to perform'
+        end
+
+        priority = args.first || 0
+        run_at   = args[1]
+
+        Job.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at)
+      end
+
+      # Find a few candidate jobs to run (in case some immediately get locked by others).
+      # Return in random order prevent everyone trying to do same head job at once.
+      def find_available( options = {} )
+        limit        = options[:limit]        || 5
+        max_run_time = options[:max_run_time] || MAX_RUN_TIME
+        worker_name  = options[:worker_name]  || Worker::DEFAULT_WORKER_NAME
+
+        sql        = NextTaskSQL.dup
+        time_now   = db_time_now
+        conditions = [time_now, time_now - max_run_time, worker_name]
+        if options[:min_priority]
+          sql << ' AND (priority >= ?)'
+          conditions << options[:min_priority]
+        end
+
+        if options[:max_priority]
+          sql << ' AND (priority <= ?)'
+          conditions << options[:max_priority]
+        end
+
+        if options[:job_types]
+          sql << ' AND (job_type IN (?))'
+          conditions << options[:job_types]
+        end
+        conditions.unshift(sql)
+
+        records = ActiveRecord::Base.silence do
+          find(:all, :conditions => conditions, :order => NextTaskOrder, :limit => limit)
+        end
+
+        records.sort_by { rand() }
+      end
+
+      # Run the next job we can get an exclusive lock on.
+      # If no jobs are left we return nil
+      def reserve_and_run_one_job( options = {} )
+        max_run_time = options[:max_run_time] || MAX_RUN_TIME
+        worker_name  = options[:worker_name]  || Worker::DEFAULT_WORKER_NAME
+        # For the next jobs availables, try to get lock. In case we cannot get exclusive
+        # access to a job we try the next.
+        # This leads to a more even distribution of jobs across the worker processes.
+        find_available( options ).each do |job|
+          t = job.run_with_lock( max_run_time, worker_name )
+          return t unless t.nil?  # return if we did work (good or bad)
+        end
+        # we didn't do any work, all 5 were not lockable
+        nil
+      end
+
+      # Do num jobs and return stats on success/failure.
+      # Exit early if interrupted.
+      def work_off( options = {} )
+        n = options[:n] || 100
+        success, failure = 0, 0
+
+        n.times do
+          case reserve_and_run_one_job( options )
+            when true
+              success += 1
+            when false
+              failure += 1
+            else
+              break  # leave if no work could be done
+          end
+          break if Worker.exit # leave if we're exiting
+        end
+
+        return [success, failure]
+      end
+
+    end # class << self
 
     def failed?
       failed_at
@@ -87,9 +166,9 @@ module Delayed
       end
     end
 
-
-    # Try to run one job. Returns true/false (work done/work failed) or nil if job can't be locked.
-    def run_with_lock(max_run_time, worker_name)
+    # Try to run one job.
+    # Returns true/false (work done/work failed) or nil if job can't be locked.
+    def run_with_lock(max_run_time = MAX_RUN_TIME, worker_name = Worker::DEFAULT_WORKER_NAME)
       Delayed::Worker.logger.info "* [JOB] aquiring lock on #{name}"
       unless lock_exclusively!(max_run_time, worker_name)
         # We did not get the lock, some other worker process must have
@@ -103,7 +182,7 @@ module Delayed
         end
         destroy_successful_jobs ? destroy :
           update_attribute(:finished_at, Time.now)
-        Delayed::Worker.logger.info "* [JOB] #{name} completed after %.4f" % runtime        
+        Delayed::Worker.logger.info "* [JOB] #{name} completed after %.4f" % runtime
         return true  # did work
       rescue Exception => e
         reschedule e.message, e.backtrace
@@ -112,71 +191,9 @@ module Delayed
       end
     end
 
-    # Add a job to the queue
-    def self.enqueue(*args, &block)
-      object = block_given? ? EvaledJob.new(&block) : args.shift
-
-      unless object.respond_to?(:perform) || block_given?
-        raise ArgumentError, 'Cannot enqueue items which do not respond to perform'
-      end
-    
-      priority = args.first || 0
-      run_at   = args[1]
-
-      Job.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at)
-    end
-
-    # Find a few candidate jobs to run (in case some immediately get locked by others).
-    # Return in random order prevent everyone trying to do same head job at once.
-    def self.find_available(limit = 5, max_run_time = MAX_RUN_TIME)
-
-      time_now = db_time_now
-
-      sql = NextTaskSQL.dup
-
-      conditions = [time_now, time_now - max_run_time, worker_name]
-
-      if self.min_priority
-        sql << ' AND (priority >= ?)'
-        conditions << min_priority
-      end
-
-      if self.max_priority
-        sql << ' AND (priority <= ?)'
-        conditions << max_priority
-      end
-
-      if self.job_types
-        sql << ' AND (job_type IN (?))'
-        conditions << job_types
-      end
-
-      conditions.unshift(sql)
-
-      records = ActiveRecord::Base.silence do
-        find(:all, :conditions => conditions, :order => NextTaskOrder, :limit => limit)
-      end
-
-      records.sort_by { rand() }
-    end
-
-    # Run the next job we can get an exclusive lock on.
-    # If no jobs are left we return nil
-    def self.reserve_and_run_one_job(max_run_time = MAX_RUN_TIME)
-
-      # We get up to 5 jobs from the db. In case we cannot get exclusive access to a job we try the next.
-      # this leads to a more even distribution of jobs across the worker processes
-      find_available(5, max_run_time).each do |job|
-        t = job.run_with_lock(max_run_time, worker_name)
-        return t unless t == nil  # return if we did work (good or bad)
-      end
-
-      nil # we didn't do any work, all 5 were not lockable
-    end
-
-    # Lock this job for this worker.
+    # Lock this job for the worker given as parameter (the name).
     # Returns true if we have the lock, false otherwise.
-    def lock_exclusively!(max_run_time, worker = worker_name)
+    def lock_exclusively!(max_run_time, worker)
       now = self.class.db_time_now
       affected_rows = if locked_by != worker
         # We don't own this job so we will update the locked_by name and the locked_at
@@ -205,26 +222,6 @@ module Delayed
     def log_exception(error)
       Delayed::Worker.logger.error "* [JOB] #{name} failed with #{error.class.name}: #{error.message} - #{attempts} failed attempts"
       Delayed::Worker.logger.error(error)
-    end
-
-    # Do num jobs and return stats on success/failure.
-    # Exit early if interrupted.
-    def self.work_off(num = 100)
-      success, failure = 0, 0
-
-      num.times do
-        case self.reserve_and_run_one_job
-        when true
-            success += 1
-        when false
-            failure += 1
-        else
-          break  # leave if no work could be done
-        end
-        break if $exit # leave if we're exiting
-      end
-
-      return [success, failure]
     end
 
     # Moved into its own method so that new_relic can trace it.

@@ -37,12 +37,10 @@ class StoryReader
 end
 
 describe 'random ruby objects' do
-  before       { Delayed::Job.delete_all }
+  before { Delayed::Job.delete_all }
 
   it "should respond_to :send_later method" do
-
     RandomRubyObject.new.respond_to?(:send_later)
-
   end
 
   it "should raise a ArgumentError if send_later is called but the target method doesn't exist" do
@@ -73,15 +71,13 @@ describe 'random ruby objects' do
   end
 
   it "should ignore ActiveRecord::RecordNotFound errors because they are permanent" do
-
     ErrorObject.new.send_later(:throw)
 
-    Delayed::Job.count.should == 1
+    Delayed::Job.unfinished.count.should == 1
 
-    Delayed::Job.reserve_and_run_one_job
+    Delayed::Job.work_off
 
-    Delayed::Job.count.should == 0
-
+    Delayed::Job.unfinished.count.should == 0
   end
 
   it "should store the object as string if its an active record" do

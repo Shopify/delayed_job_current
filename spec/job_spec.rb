@@ -21,19 +21,15 @@ end
 module M
   class ModuleJob
     cattr_accessor :runs; self.runs = 0
-    def perform; @@runs += 1; end    
+    def perform; @@runs += 1; end
   end
-  
 end
 
 describe Delayed::Job do
-  before  do               
-    Delayed::Job.max_priority = nil
-    Delayed::Job.min_priority = nil      
-    
+  before do
     Delayed::Job.delete_all
   end
-  
+
   before(:each) do
     SimpleJob.runs = 0
   end
@@ -81,37 +77,28 @@ describe Delayed::Job do
   it "should work on specified job types" do
     SimpleJob.runs.should == 0
 
-    Delayed::Job.job_types = "SimpleJob"
     Delayed::Job.enqueue SimpleJob.new
-    Delayed::Job.work_off
+    Delayed::Job.work_off :job_types => "SimpleJob"
 
     SimpleJob.runs.should == 1
-
-    Delayed::Job.job_types = nil
   end
 
   it "should not work on unspecified job types" do
     SimpleJob.runs.should == 0
 
-    Delayed::Job.job_types = "AnotherJob"
     Delayed::Job.enqueue SimpleJob.new
-    Delayed::Job.work_off
+    Delayed::Job.work_off :job_types => "AnotherJob"
 
     SimpleJob.runs.should == 0
-
-    Delayed::Job.job_types = nil
   end
 
   it "should work on specified job types even when it's a list" do
     SimpleJob.runs.should == 0
 
-    Delayed::Job.job_types = %w( Whatever SimpleJob )
     Delayed::Job.enqueue SimpleJob.new
-    Delayed::Job.work_off
+    Delayed::Job.work_off :job_types => %w( Whatever SimpleJob )
 
     SimpleJob.runs.should == 1
-
-    Delayed::Job.job_types = nil
   end
 
   it "should work with eval jobs" do
@@ -126,7 +113,7 @@ describe Delayed::Job do
 
     $eval_job_ran.should == true
   end
-                   
+
   it "should work with jobs in modules" do
     M::ModuleJob.runs.should == 0
 
@@ -175,14 +162,14 @@ describe Delayed::Job do
   it "should never find finished jobs" do
     @job = Delayed::Job.create :payload_object => SimpleJob.new,
       :finished_at => Time.now
-    Delayed::Job.find_available(1).length.should == 0
+    Delayed::Job.find_available( :limit => 1 ).length.should == 0
   end
 
   it "should re-schedule by about 1 second at first and increment this more and more minutes when it fails to execute properly" do
-    Delayed::Job.enqueue ErrorJob.new
-    Delayed::Job.work_off(1)
+    job = Delayed::Job.enqueue ErrorJob.new
+    Delayed::Job.work_off( :n => 1 )
 
-    job = Delayed::Job.find(:first)
+    job.reload
 
     job.last_error.should =~ /did not work/
     job.last_error.should =~ /job_spec.rb:14:in `perform'/
@@ -232,7 +219,7 @@ describe Delayed::Job do
     job.should_receive(:attempt_to_load).with('Delayed::JobThatDoesNotExist').and_return(true)
     lambda { job.payload_object.perform }.should raise_error(Delayed::DeserializationError)
   end
-  
+
   it "should be failed if it failed more than MAX_ATTEMPTS times and we don't want to destroy jobs" do
     default = Delayed::Job.destroy_failed_jobs
     Delayed::Job.destroy_failed_jobs = false
@@ -269,21 +256,22 @@ describe Delayed::Job do
 
   it "should fail after MAX_RUN_TIME" do
     @job = Delayed::Job.create :payload_object => LongRunningJob.new
-    Delayed::Job.reserve_and_run_one_job(1.second)
+    Delayed::Job.reserve_and_run_one_job( :max_run_time => 1.second )
     @job.reload.last_error.should =~ /expired/
     @job.attempts.should == 1
   end
 
   it "should never find failed jobs" do
     @job = Delayed::Job.create :payload_object => SimpleJob.new, :attempts => 50, :failed_at => Time.now
-    Delayed::Job.find_available(1).length.should == 0
+    Delayed::Job.find_available( :limit => 1 ).length.should == 0
   end
 
   context "when another worker is already performing an task, it" do
 
     before :each do
-      Delayed::Job.worker_name = 'worker1'
-      @job = Delayed::Job.create :payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => Delayed::Job.db_time_now - 5.minutes
+      @job = Delayed::Job.create :payload_object => SimpleJob.new,
+                                 :locked_by => 'worker1',
+                                 :locked_at => Delayed::Job.db_time_now - 5.minutes
     end
 
     it "should not allow a second worker to get exclusive access" do
@@ -292,8 +280,8 @@ describe Delayed::Job do
 
     it "should allow a second worker to get exclusive access if the timeout has passed" do
       @job.lock_exclusively!(1.minute, 'worker2').should == true
-    end      
-    
+    end
+
     it "should be able to get access to the task if it was started more then max_age ago" do
       @job.locked_at = 5.hours.ago
       @job.save
@@ -305,24 +293,20 @@ describe Delayed::Job do
     end
 
     it "should not be found by another worker" do
-      Delayed::Job.worker_name = 'worker2'
-
-      Delayed::Job.find_available(1, 6.minutes).length.should == 0
+      Delayed::Job.find_available( :worker_name => 'worker2', :max_run_time => 6.minutes ).should have(0).jobs
     end
 
     it "should be found by another worker if the time has expired" do
-      Delayed::Job.worker_name = 'worker2'
-
-      Delayed::Job.find_available(1, 4.minutes).length.should == 1
+      Delayed::Job.find_available( :worker_name => 'worker2', :max_run_time => 4.minutes ).should have(1).job
     end
 
     it "should be able to get exclusive access again when the worker name is the same" do
       @job.lock_exclusively! 5.minutes, 'worker1'
       @job.lock_exclusively! 5.minutes, 'worker1'
       @job.lock_exclusively! 5.minutes, 'worker1'
-    end                                        
-  end            
-  
+    end
+  end
+
   context "#name" do
     it "should be the class name of the job that was enqueued" do
       Delayed::Job.create(:payload_object => ErrorJob.new ).name.should == 'ErrorJob'
@@ -334,93 +318,78 @@ describe Delayed::Job do
 
     end
     it "should be the instance method that will be called if its a performable method object" do
-      story = Story.create :text => "..."                 
-      
+      story = Story.create :text => "..."
+
       story.send_later(:save)
-      
+
       Delayed::Job.last.name.should == 'Story#save'
     end
   end
-  
+
   context "worker prioritization" do
-    
-    before(:each) do
-      Delayed::Job.max_priority = nil
-      Delayed::Job.min_priority = nil      
-    end
-  
     it "should only work_off jobs that are >= min_priority" do
-      Delayed::Job.min_priority = -5
-      Delayed::Job.max_priority = 5
       SimpleJob.runs.should == 0
-    
+
       Delayed::Job.enqueue SimpleJob.new, -10
       Delayed::Job.enqueue SimpleJob.new, 0
-      Delayed::Job.work_off
-    
+      Delayed::Job.work_off :min_priority => -5, :max_priority => 5
+
       SimpleJob.runs.should == 1
     end
-  
+
     it "should only work_off jobs that are <= max_priority" do
-      Delayed::Job.min_priority = -5
-      Delayed::Job.max_priority = 5
       SimpleJob.runs.should == 0
-    
+
       Delayed::Job.enqueue SimpleJob.new, 10
       Delayed::Job.enqueue SimpleJob.new, 0
 
-      Delayed::Job.work_off
+      Delayed::Job.work_off :min_priority => -5, :max_priority => 5
 
       SimpleJob.runs.should == 1
-    end                         
-   
+    end
   end
-  
+
   context "when pulling jobs off the queue for processing, it" do
     before(:each) do
       @job = Delayed::Job.create(
-        :payload_object => SimpleJob.new, 
-        :locked_by => 'worker1', 
-        :locked_at => Delayed::Job.db_time_now - 5.minutes)
+        :payload_object => SimpleJob.new,
+        :locked_by      => 'worker1',
+        :locked_at      => Delayed::Job.db_time_now - 5.minutes )
     end
 
     it "should leave the queue in a consistent state and not run the job if locking fails" do
-      SimpleJob.runs.should == 0     
+      SimpleJob.runs.should == 0
       @job.stub!(:lock_exclusively!).with(any_args).once.and_return(false)
       Delayed::Job.should_receive(:find_available).once.and_return([@job])
-      Delayed::Job.work_off(1)
+      Delayed::Job.work_off( :n => 1 )
       SimpleJob.runs.should == 0
     end
-  
+
   end
-  
+
   context "while running alongside other workers that locked jobs, it" do
     before(:each) do
-      Delayed::Job.worker_name = 'worker1'
-      Delayed::Job.create(:payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => (Delayed::Job.db_time_now - 1.minutes))
-      Delayed::Job.create(:payload_object => SimpleJob.new, :locked_by => 'worker2', :locked_at => (Delayed::Job.db_time_now - 1.minutes))
-      Delayed::Job.create(:payload_object => SimpleJob.new)
-      Delayed::Job.create(:payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => (Delayed::Job.db_time_now - 1.minutes))
+      Delayed::Job.create :payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => (Delayed::Job.db_time_now - 1.minutes)
+      Delayed::Job.create :payload_object => SimpleJob.new, :locked_by => 'worker2', :locked_at => (Delayed::Job.db_time_now - 1.minutes)
+      Delayed::Job.create :payload_object => SimpleJob.new
+      Delayed::Job.create :payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => (Delayed::Job.db_time_now - 1.minutes)
     end
 
     it "should ingore locked jobs from other workers" do
-      Delayed::Job.worker_name = 'worker3'
       SimpleJob.runs.should == 0
-      Delayed::Job.work_off
+      Delayed::Job.work_off :worker_name => 'worker3'
       SimpleJob.runs.should == 1 # runs the one open job
     end
 
     it "should find our own jobs regardless of locks" do
-      Delayed::Job.worker_name = 'worker1'
       SimpleJob.runs.should == 0
-      Delayed::Job.work_off
+      Delayed::Job.work_off :worker_name => 'worker1'
       SimpleJob.runs.should == 3 # runs open job plus worker1 jobs that were already locked
     end
   end
 
   context "while running with locked and expired jobs, it" do
     before(:each) do
-      Delayed::Job.worker_name = 'worker1'
       exp_time = Delayed::Job.db_time_now - (1.minutes + Delayed::Job::MAX_RUN_TIME)
       Delayed::Job.create(:payload_object => SimpleJob.new, :locked_by => 'worker1', :locked_at => exp_time)
       Delayed::Job.create(:payload_object => SimpleJob.new, :locked_by => 'worker2', :locked_at => (Delayed::Job.db_time_now - 1.minutes))
@@ -429,20 +398,19 @@ describe Delayed::Job do
     end
 
     it "should only find unlocked and expired jobs" do
-      Delayed::Job.worker_name = 'worker3'
       SimpleJob.runs.should == 0
-      Delayed::Job.work_off
+      Delayed::Job.work_off :worker_name => 'worker3'
       SimpleJob.runs.should == 2 # runs the one open job and one expired job
     end
 
     it "should ignore locks when finding our own jobs" do
-      Delayed::Job.worker_name = 'worker1'
       SimpleJob.runs.should == 0
-      Delayed::Job.work_off
+      Delayed::Job.work_off :worker_name => 'worker1'
       SimpleJob.runs.should == 3 # runs open job plus worker1 jobs
-      # This is useful in the case of a crash/restart on worker1, but make sure multiple workers on the same host have unique names!
+      # This is useful in the case of a crash/restart on worker1,
+      # but make sure multiple workers on the same host have unique names!
     end
 
   end
-  
+
 end
