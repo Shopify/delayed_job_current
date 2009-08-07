@@ -1,6 +1,6 @@
 h1. Delayed::Job
 
-Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background. 
+Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background.
 
 It is a direct extraction from Shopify where the job table is responsible for a multitude of core tasks. Amongst those tasks are:
 
@@ -9,12 +9,19 @@ It is a direct extraction from Shopify where the job table is responsible for a 
 * http downloads
 * updating smart collections
 * updating solr, our search server, after product changes
-* batch imports 
-* spam checks 
-            
+* batch imports
+* spam checks
+
+h2. What is this fork for?
+
+My purpose with this fork is make delayed_job for flexible. That's means you can customize how your workers behave.
+
+The common use will be to have several workers running concurrently (in one process) and each one with differents constraints so they'll run different kind of jobs.
+
+
 h2. Setup
-            
-The library evolves around a delayed_jobs table which looks as follows: 
+
+The library evolves around a delayed_jobs table which looks as follows:
 <pre><code>create_table :delayed_jobs, :force => true do |table|
     table.integer  :priority, :default => 0      # Allows some jobs to jump to the front of the queue
     table.integer  :attempts, :default => 0      # Provides for retries, but still fail eventually.
@@ -29,28 +36,32 @@ The library evolves around a delayed_jobs table which looks as follows:
     table.timestamps
   end
 </code></pre>
+You can generate the migration executing:
+<pre><code>$ script/generate delayed_job
+      exists  db/migrate
+      create  db/migrate/20090807090217_create_delayed_jobs.rb
+</code></pre>
+
 On failure, the job is scheduled again in 5 seconds + N ** 4, where N is the number of retries.
 
-The default MAX_ATTEMPTS is 25- jobs can override this value by responding to :max_attempts. After this, the job
-either deleted (default), or left in the database with "failed_at" set. With the default of 25 attempts, 
-the last retry will be 20 days later, with the last interval being almost 100 hours.
+The default @MAX_ATTEMPTS@ is 25 (jobs can override this value by responding to @:max_attempts@). After this, the job either deleted (default), or left in the database with "failed_at" set. With the default of 25 attempts, the last retry will be 20 days later, with the last interval being almost 100 hours.
 
-The default MAX_RUN_TIME is 4.hours. If your job takes longer than that, another computer could pick it up. It's up to you to
-make sure your job doesn't exceed this time. You should set this to the longest time you think the job could take.
+The default @MAX_RUN_TIME@ is 4.hours. If your job takes longer than that, another computer could pick it up. It's up to you to make sure your job doesn't exceed this time. You should set this to the longest time you think the job could take.
 
-By default, it will delete failed jobs. If you want to keep failed jobs, set
-@Delayed::Job.destroy_failed_jobs = false@. The failed jobs will be marked with non-null failed_at.
+By default, it will delete failed jobs. If you want to keep failed jobs, set @Delayed::Job.destroy_failed_jobs = false@. The failed jobs will be marked with non-null failed_at.
 
 Same thing for successful jobs. They're deleted by default and, to keep them, set @Delayed::Job.destroy_successful_jobs = false@. They will be marked with finished_at. This is useful for gathering statistics like how long jobs took between entering the queue (created_at) and being finished (finished_at).
 
+You have a couble of named scopes for searching unfinished/finsihed jobs, very useful when destroy_successful_jobs is false @Delayed::Job.unfinished@ and @Delayed::Job.finsihed@.
+
 Here is an example of changing job parameters in Rails:
 <pre><code># config/initializers/delayed_job_config.rb
-  Delayed::Job.destroy_failed_jobs = false
-  Delayed::Job.destroy_successful_jobs = false
-  silence_warnings do
-    Delayed::Job.const_set("MAX_ATTEMPTS", 3)
-    Delayed::Job.const_set("MAX_RUN_TIME", 5.minutes)
-  end
+Delayed::Job.destroy_failed_jobs     = false
+Delayed::Job.destroy_successful_jobs = false
+silence_warnings do
+  Delayed::Job.const_set("MAX_ATTEMPTS", 3)
+  Delayed::Job.const_set("MAX_RUN_TIME", 5.hours)
+end
 </code></pre>
 Note: If your error messages are long, consider changing last_error field to a :text instead of a :string (255 character limit).
 
@@ -58,48 +69,71 @@ Note: If your error messages are long, consider changing last_error field to a :
 h2. Usage
 
 Jobs are simple ruby objects with a method called perform. Any object which responds to perform can be stuffed into the jobs table.
-Job objects are serialized to yaml so that they can later be resurrected by the job runner. 
+Job objects are serialized to yaml so that they can later be resurrected by the job runner.
 <pre><code>class NewsletterJob < Struct.new(:text, :emails)
-    def perform
-      emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
-    end    
-  end  
-  
-  Delayed::Job.enqueue NewsletterJob.new('lorem ipsum...', Customers.find(:all).collect(&:email))
-</code></pre>
-There is also a second way to get jobs in the queue: send_later. 
+  def perform
+    emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
+  end
+end
 
-<pre><code>BatchImporter.new(Shop.find(1)).send_later(:import_massive_csv, massive_csv)
-</code></pre>
+Delayed::Job.enqueue NewsletterJob.new('lorem ipsum...', Customers.find(:all).collect(&:email))</code></pre>
+There is also a second way to get jobs in the queue: send_later.
 
-This will simply create a Delayed::PerformableMethod job in the jobs table which serializes all the parameters you pass to it. There are some special smarts for active record objects
-which are stored as their text representation and loaded from the database fresh when the job is actually run later.
-                                                                                                                              
-                                                                                                                    
+<pre><code>BatchImporter.new(Shop.find(1)).send_later(:import_massive_csv, massive_csv)</code></pre>
+
+And also you can specified priority as second parameter and the time the job should execute as thrird one
+
+<pre><code>#!/usr/bin/env ruby
+class FooJob
+  def perform
+    ...
+  end
+end
+
+important_job = FooJob.new
+normal_job    = FooJob.new
+
+# Delayed::Job.enqueue( job, priority, start_at )
+Delayed::Job.enqueue important_job, 100
+Delayed::Job.enqueue normal_job, 1, 2.hours.from_now</pre></code>
+
+This will simply create a @Delayed::PerformableMethod@ job in the jobs table which serializes all the parameters you pass to it. There are some special smarts for active record objects which are stored as their text representation and loaded from the database fresh when the job is actually run later.
+
+
 h2. Running the jobs
 
-You can invoke @rake jobs:work@ which will start working off jobs. You can cancel the rake task with @CTRL-C@. 
+You can invoke @rake jobs:work@ which will start working off jobs. You can cancel the rake task with @CTRL-C@.
 
 You can also run by writing a simple @script/job_runner@, and invoking it externally:
-  
+
 <pre><code>#!/usr/bin/env ruby
   require File.dirname(__FILE__) + '/../config/environment'
-  
-  Delayed::Worker.new.start  
+
+  Delayed::Worker.new.start
 </code></pre>
 
-Workers can be running on any computer, as long as they have access to the database and their clock is in sync. You can even
-run multiple workers on per computer, but you must give each one a unique name. (TODO: put in an example)
+Workers can be running on any computer, as long as they have access to the database and their clock is in sync. You can even run multiple workers on per computer, but you must give each one a unique name.
+
+<pre><code>#!/usr/bin/env ruby
+require File.dirname(__FILE__) + '/../config/environment'
+N = 10
+workers = []
+N.times do |n|
+  workers << Thread.new do
+    Delayed::Worker.new( :name => "Worker #{n}" ).start
+  end
+end
+
+workers.first.join # wait until finish (signal catched)
+</pre></code>
 Keep in mind that each worker will check the database at least every 5 seconds.
 
 Note: The rake task will exit if the database has any network connectivity problems.
 
 If you only want to run specific types of jobs in a given worker, include them when initializing the worker:
 
-<pre><code>
-  Delayed::Worker.new(:job_types => "SimpleJob").start
-  Delayed::Worker.new(:job_types => ["SimpleJob", "NewsletterJob"]).start
-</pre></code>
+<pre><code>Delayed::Worker.new(:job_types => "SimpleJob").start
+  Delayed::Worker.new(:job_types => ["SimpleJob", "NewsletterJob"]).start</pre></code>
 
 h3. Cleaning up
 
@@ -107,9 +141,9 @@ You can invoke @rake jobs:clear@ to delete all jobs in the queue.
 
 h3. Changes
 
-* 1.7.0: Added failed_at column which can optionally be set after a certain amount of failed job attempts. By default failed job attempts are destroyed after about a month. 
+* 1.7.0: Added failed_at column which can optionally be set after a certain amount of failed job attempts. By default failed job attempts are destroyed after about a month.
 
-* 1.6.0: Renamed locked_until to locked_at. We now store when we start a given job instead of how long it will be locked by the worker. This allows us to get a reading on how long a job took to execute.                    
+* 1.6.0: Renamed locked_until to locked_at. We now store when we start a given job instead of how long it will be locked by the worker. This allows us to get a reading on how long a job took to execute.
 
 * 1.5.0: Job runners can now be run in parallel. Two new database columns are needed: locked_until and locked_by. This allows us to use   pessimistic locking instead of relying on row level locks. This enables us to run as many worker processes as we need to speed up queue processing.
 
