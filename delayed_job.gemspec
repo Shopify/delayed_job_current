@@ -2,20 +2,17 @@
 
 Gem::Specification.new do |s|
   s.name = %q{delayed_job}
-  s.version = "1.7.99"
+  s.version = "2.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tobias L\303\274tke"]
-  s.date = %q{2009-08-06}
+  s.date = %q{2009-08-10}
   s.description = %q{Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background. It is a direct extraction from Shopify where the job table is responsible for a multitude of core tasks.}
   s.email = %q{tobi@leetsoft.com}
-  s.extra_rdoc_files = [
-    "README.textile"
-  ]
   s.files = [
     ".gitignore",
      "MIT-LICENSE",
-     "README.textile",
+     "README.markdown",
      "Rakefile",
      "VERSION",
      "delayed_job.gemspec",
