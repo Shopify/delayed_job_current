@@ -76,6 +76,11 @@ module Delayed
           sql << ' AND (job_type IN (?))'
           conditions << options[:job_types]
         end
+
+        if options[:only_for]
+          sql << ' AND name LIKE ?'
+          conditions << "%#{options[:only_for]}%"
+        end
         conditions.unshift(sql)
 
         ActiveRecord::Base.silence do
@@ -132,13 +137,15 @@ module Delayed
     end
 
     def name
-      @name ||= begin
+      if new_record?
         payload = payload_object
         if payload.respond_to?(:display_name)
           payload.display_name
         else
           payload.class.name
         end
+      else
+        self['name']
       end
     end
 
@@ -271,6 +278,7 @@ module Delayed
 
     def before_save
       self.run_at ||= self.class.db_time_now
+      self['name'] = name
     end
 
   end

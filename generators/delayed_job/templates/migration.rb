@@ -5,6 +5,7 @@ class CreateDelayedJobs < ActiveRecord::Migration
       t.integer  :attempts, :default => 0
       t.text     :handler
       t.string   :job_type
+      t.string   :name
       t.string   :last_error
       t.datetime :run_at
       t.datetime :locked_at

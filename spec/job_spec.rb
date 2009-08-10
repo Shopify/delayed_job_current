@@ -7,6 +7,10 @@ end
 
 class CustomJob < SimpleJob
   def max_attempts; 3; end
+
+  def display_name
+    "custom name for the job"
+  end
 end
 
 class ErrorJob
@@ -72,6 +76,17 @@ describe Delayed::Job do
     Delayed::Job.work_off
 
     SimpleJob.runs.should == 1
+  end
+
+  it "should set name properly according to the class" do
+    job = Delayed::Job.enqueue SimpleJob.new
+    job.name.should == "SimpleJob"
+  end
+
+  it "should set name properly when display_name method is defined in the object" do
+    job = Delayed::Job.enqueue CustomJob.new
+    job.name.should_not == "CustomJob"
+    job.name.should == "custom name for the job"
   end
 
   it "should work on specified job types for common objects" do
@@ -185,7 +200,7 @@ describe Delayed::Job do
     job.reload
 
     job.last_error.should =~ /did not work/
-    job.last_error.should =~ /job_spec.rb:14:in `perform'/
+    job.last_error.should =~ /job_spec.rb:\d+:in `perform'/
     job.attempts.should == 1
 
     job.run_at.should > Delayed::Job.db_time_now - 10.minutes
@@ -279,6 +294,18 @@ describe Delayed::Job do
     @job_20 = Delayed::Job.create :payload_object => SimpleJob.new, :priority => 20
 
     Delayed::Job.find_available( :limit => 1 ).first.should == @job_20
+  end
+
+  it "should find only jobs like the parameter given" do
+    Delayed::Job.create :payload_object => SimpleJob.new
+    Delayed::Job.create :payload_object => CustomJob.new
+    Delayed::Job.unfinished.should have(2).jobs
+
+    Delayed::Job.work_off :only_for => 'Simple'
+    Delayed::Job.unfinished.should have(1).jobs
+
+    Delayed::Job.work_off :only_for => 'custom'
+    Delayed::Job.unfinished.should have(0).jobs
   end
 
   it "should never find failed jobs" do

@@ -27,6 +27,7 @@ The library evolves around a delayed_jobs table which looks as follows:
     table.integer  :attempts, :default => 0      # Provides for retries, but still fail eventually.
     table.text     :handler                      # YAML-encoded string of the object that will do work
     table.string   :job_type                     # Class name of the job object, for type-specific workers
+    table.string   :name                         # The display name, an informative field or can be use to filter jobs
     table.string   :last_error                   # reason for last failure (See Note below)
     table.datetime :run_at                       # When to run. Could be Time.now for immediately, or sometime in the future.
     table.datetime :locked_at                    # Set when a client is working on this object
@@ -95,7 +96,7 @@ normal_job    = FooJob.new
 
 # Delayed::Job.enqueue( job, priority, start_at )
 Delayed::Job.enqueue important_job, 100
-Delayed::Job.enqueue normal_job, 1, 2.hours.from_now</pre></code>
+Delayed::Job.enqueue normal_job, 1, 2.hours.from_now</code></pre>
 
 This will simply create a @Delayed::PerformableMethod@ job in the jobs table which serializes all the parameters you pass to it. There are some special smarts for active record objects which are stored as their text representation and loaded from the database fresh when the job is actually run later.
 
@@ -132,8 +133,39 @@ Note: The rake task will exit if the database has any network connectivity probl
 
 If you only want to run specific types of jobs in a given worker, include them when initializing the worker:
 
-<pre><code>Delayed::Worker.new(:job_types => "SimpleJob").start
-  Delayed::Worker.new(:job_types => ["SimpleJob", "NewsletterJob"]).start</pre></code>
+<pre><code>  Delayed::Worker.new(:job_types => "SimpleJob").start
+  Delayed::Worker.new(:job_types => ["SimpleJob", "NewsletterJob"]).start</code></pre>
+
+Also for a more specific restriction you can define in your job's classes a @display_name@ method, and create workers to specific kind of jobs
+<pre><code>
+  1 - The job class that does the real work
+  class MyJob
+    def initialize( data )
+      @some_data = data
+    end
+    
+    def perform
+      do the real work
+    end
+    
+    def display_name
+      "foobar #{@some_data}"
+    end
+  end
+  
+  2 - Enqueue jobs
+  Delayed::Job.enqueue MyJob.new("foobar")
+  Delayed::Job.enqueue MyJob.new("arrrr")
+  
+  3 - Create workers, one for each type of "data"
+  Thread.new {
+    (This worker will only perform jobs which display name is like "%foobar%")
+    Delayed::Worker.new :name => "Worker for foobar", :only_for => "foobar"
+  }
+  Thread.new {
+    Delayed::Worker.new :name => "Worker for arrr", :only_for => "arrr"
+  }
+</code></pre>
 
 h3. Cleaning up
 
