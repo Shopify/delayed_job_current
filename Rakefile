@@ -10,9 +10,9 @@ Jeweler::Tasks.new do |s|
   s.name     = "delayed_job"
   s.summary  = "Database-backed asynchronous priority queue system -- Extracted from Shopify"
   s.email    = "tobi@leetsoft.com"
-  s.homepage = "http://github.com/collectiveidea/delayed_job"
+  s.homepage = "http://github.com/altrux/delayed_job"
   s.description = "Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background. It is a direct extraction from Shopify where the job table is responsible for a multitude of core tasks."
-  s.authors  = ["Brandon Keepers", "Tobias Lütke"]
+  s.authors  = ["Adam Dill", "Brandon Keepers", "Tobias Lütke"]
   
   s.has_rdoc = true
   s.rdoc_options = ["--main", "README.textile", "--inline-source", "--line-numbers"]
