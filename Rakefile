@@ -1,4 +1,7 @@
 # -*- encoding: utf-8 -*-
+require 'spec/rake/spectask'
+task :default => :spec
+
 begin
   require 'jeweler'
 rescue LoadError
@@ -21,9 +24,7 @@ Jeweler::Tasks.new do |s|
   s.test_files = Dir['spec/**/*']
 end
 
-require 'spec/rake/spectask'
-
-task :default => :spec
+Jeweler::GemcutterTasks.new
 
 desc 'Run the specs'
 Spec::Rake::SpecTask.new(:spec) do |t|
