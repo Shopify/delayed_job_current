@@ -147,4 +147,52 @@ describe 'random ruby objects' do
     end
   end
 
+  context "send_with_priority" do
+    it "should queue a new job" do
+      lambda do
+        "string".send_with_priority(1, :length)
+      end.should change { Delayed::Job.count }.by(1)
+    end
+    
+    it "should schedule the job with a priority" do
+      priority = 1
+      job = "string".send_with_priority(priority, :length)
+      job.priority.should == priority
+    end
+    
+    it "should store payload as PerformableMethod with priority" do
+      job = "string".send_with_priority(1, :count, 'r')
+      job.payload_object.class.should   == Delayed::PerformableMethod
+      job.payload_object.method.should  == :count
+      job.payload_object.args.should    == ['r']
+      job.payload_object.perform.should == 1
+      job.priority.should == 1
+    end
+  end
+
+  context "send_with_priority_at" do
+    it "should queue a new job" do
+      lambda do
+        "string".send_with_priority_at(1,1.hour.from_now, :length)
+      end.should change { Delayed::Job.count }.by(1)
+    end
+    
+    it "should schedule the job in the future with a priority" do
+      time = 1.hour.from_now
+      priority = 1
+      job = "string".send_with_priority_at(priority, time, :length)
+      job.run_at.should == time
+      job.priority.should == priority
+    end
+    
+    it "should store payload as PerformableMethod" do
+      job = "string".send_with_priority_at(1, 1.hour.from_now, :count, 'r')
+      job.payload_object.class.should   == Delayed::PerformableMethod
+      job.payload_object.method.should  == :count
+      job.payload_object.args.should    == ['r']
+      job.payload_object.perform.should == 1
+      job.priority.should == 1
+    end
+  end
+
 end

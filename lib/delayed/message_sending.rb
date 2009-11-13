@@ -8,6 +8,14 @@ module Delayed
       Delayed::Job.enqueue(Delayed::PerformableMethod.new(self, method.to_sym, args), 0, time)
     end
     
+    def send_with_priority(priority, method, *args)
+      Delayed::Job.enqueue(Delayed::PerformableMethod.new(self, method.to_sym, args), priority)
+    end
+    
+    def send_with_priority_at(priority, time, method, *args)
+      Delayed::Job.enqueue(Delayed::PerformableMethod.new(self, method.to_sym, args), priority, time)
+    end
+    
     module ClassMethods
       def handle_asynchronously(method)
         aliased_method, punctuation = method.to_s.sub(/([?!=])$/, ''), $1
