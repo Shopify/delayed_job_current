@@ -70,7 +70,6 @@ describe Delayed::Job do
     SimpleJob.runs.should == 1
   end
                      
-                     
   it "should work with eval jobs" do
     $eval_job_ran = false
 
@@ -342,4 +341,41 @@ describe Delayed::Job do
 
   end
   
+  context "Different job runners" do
+    before :each do
+      @job1 = Delayed::Job.create! :payload_object => SimpleJob.new, :runner => 'runner1'
+      @job2 = Delayed::Job.create! :payload_object => SimpleJob.new, :runner => 'runner2'
+      @job3 = Delayed::Job.create! :payload_object => SimpleJob.new, :runner => nil
+    end
+
+    it "should only work off jobs assigned to themselves" do
+      Delayed::Job.runner_name = 'runner1'
+      SimpleJob.runs.should == 0
+      Delayed::Job.work_off
+      SimpleJob.runs.should == 1
+
+      SimpleJob.runs = 0
+
+      Delayed::Job.runner_name = 'runner2'
+      SimpleJob.runs.should == 0
+      Delayed::Job.work_off
+      SimpleJob.runs.should == 1
+    end
+
+    it "should not work off jobs not assigned to themselves" do
+      Delayed::Job.runner_name = 'runner3'
+
+      SimpleJob.runs.should == 0
+      Delayed::Job.work_off
+      SimpleJob.runs.should == 0
+    end
+
+    it "should run non-named runner jobs when the runner has no name set" do
+      Delayed::Job.runner_name = nil
+
+      SimpleJob.runs.should == 0
+      Delayed::Job.work_off
+      SimpleJob.runs.should == 1
+    end
+  end
 end

@@ -27,9 +27,10 @@ module Delayed
 
     ParseObjectFromYaml = /\!ruby\/\w+\:([^\s]+)/
 
-    cattr_accessor :min_priority, :max_priority
+    cattr_accessor :min_priority, :max_priority, :runner_name
     self.min_priority = nil
     self.max_priority = nil
+    self.runner_name = nil
 
     # When a worker is exiting, make sure we don't have any locked jobs.
     def self.clear_locks!
@@ -126,6 +127,13 @@ module Delayed
       sql = NextTaskSQL.dup
 
       conditions = [time_now, time_now - max_run_time, worker_name]
+
+      if self.runner_name
+        sql << ' AND (runner = ?)'
+        conditions << runner_name
+      else
+        sql << ' AND (runner is null)'
+      end
 
       if self.min_priority
         sql << ' AND (priority >= ?)'
