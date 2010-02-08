@@ -49,13 +49,13 @@ describe Delayed::Job do
   end
 
   it "should be able to set priority when enqueuing items" do
-    Delayed::Job.enqueue SimpleJob.new, 5
+    Delayed::Job.enqueue SimpleJob.new, :priority => 5
     Delayed::Job.first.priority.should == 5
   end
 
   it "should be able to set run_at when enqueuing items" do
     later = (Delayed::Job.db_time_now+5.minutes)
-    Delayed::Job.enqueue SimpleJob.new, 5, later
+    Delayed::Job.enqueue SimpleJob.new, :priority => 5, :run_at => later
 
     # use be close rather than equal to because millisecond values cn be lost in DB round trip
     Delayed::Job.first.run_at.should be_close(later, 1)
@@ -251,8 +251,8 @@ describe Delayed::Job do
       Delayed::Job.max_priority = 5
       SimpleJob.runs.should == 0
     
-      Delayed::Job.enqueue SimpleJob.new, -10
-      Delayed::Job.enqueue SimpleJob.new, 0
+      Delayed::Job.enqueue SimpleJob.new, :priority => -10
+      Delayed::Job.enqueue SimpleJob.new, :priority => 0
       Delayed::Job.work_off
     
       SimpleJob.runs.should == 1
@@ -263,8 +263,8 @@ describe Delayed::Job do
       Delayed::Job.max_priority = 5
       SimpleJob.runs.should == 0
     
-      Delayed::Job.enqueue SimpleJob.new, 10
-      Delayed::Job.enqueue SimpleJob.new, 0
+      Delayed::Job.enqueue SimpleJob.new, :priority => 10
+      Delayed::Job.enqueue SimpleJob.new, :priority => 0
 
       Delayed::Job.work_off
 

@@ -110,10 +110,11 @@ module Delayed
         raise ArgumentError, 'Cannot enqueue items which do not respond to perform'
       end
     
-      priority = args.first || 0
-      run_at   = args[1]
+      options = args.first || {}
+      options[:priority] ||= 0
+      options[:payload_object] = object
 
-      Job.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at)
+      Job.create options
     end
 
     # Find a few candidate jobs to run (in case some immediately get locked by others).
