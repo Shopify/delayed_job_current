@@ -115,7 +115,7 @@ describe Delayed::Job do
     Delayed::Job.destroy_failed_jobs = false
     Delayed::Job::max_attempts = 1
     job = Delayed::Job.enqueue ErrorJob.new
-    job.run(1)
+    Delayed::Job.work_off
     job.reload
     job.last_error.should =~ /did not work/
     job.last_error.should =~ /job_spec.rb/
