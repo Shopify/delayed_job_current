@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{delayed_job_queued}
-  s.version = "1.8.5"
+  s.version = "1.8.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tobias L\303\274tke", "Peter Fitzgibbons"]
@@ -16,13 +16,14 @@ Gem::Specification.new do |s|
     "README.textile"
   ]
   s.files = [
-    ".gitignore",
+    ".bundle/config",
+     ".gitignore",
      "Gemfile",
      "MIT-LICENSE",
      "README.textile",
      "Rakefile",
      "VERSION",
-     "delayed_job.gemspec",
+     "delayed_job_queued.gemspec",
      "generators/delayed_job_migration/delayed_job_migration_generator.rb",
      "generators/delayed_job_migration/templates/migration.rb",
      "init.rb",
