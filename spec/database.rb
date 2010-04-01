@@ -18,6 +18,7 @@ ActiveRecord::Schema.define do
   create_table :delayed_jobs, :force => true do |table|
     table.integer  :priority, :default => 0
     table.integer  :attempts, :default => 0
+    table.string   :queue
     table.text     :handler
     table.string   :last_error
     table.datetime :run_at

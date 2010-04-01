@@ -15,6 +15,11 @@ module Delayed
     # for the failure), set this to false.
     cattr_accessor :destroy_failed_jobs
     self.destroy_failed_jobs = true
+    
+    # Default queue name is nil.  This can be reset for queue-specific processing
+    # this implements multi-queue's per table
+    cattr_accessor :queue_name
+    def self.queue_name; @@queue_name || 'default'; end
 
     # Every worker has a unique name which by default is the pid of the process.
     # There are some advantages to overriding this with something which survives worker retarts:
@@ -22,7 +27,7 @@ module Delayed
     cattr_accessor :worker_name
     self.worker_name = "host:#{Socket.gethostname} pid:#{Process.pid}" rescue "pid:#{Process.pid}"
 
-    NextTaskSQL         = '(run_at <= ? AND (locked_at IS NULL OR locked_at < ?) OR (locked_by = ?)) AND failed_at IS NULL'
+    NextTaskSQL         = '(queue = ? AND run_at <= ? AND (locked_at IS NULL OR locked_at < ?) OR (locked_by = ?)) AND failed_at IS NULL'
     NextTaskOrder       = 'priority DESC, run_at ASC'
 
     ParseObjectFromYaml = /\!ruby\/\w+\:([^\s]+)/
@@ -102,6 +107,13 @@ module Delayed
       end
     end
 
+    class << self
+      alias :orig_count :count      
+    end
+    def self.count
+      orig_count(:conditions => {:queue => queue_name})
+    end
+    
     # Add a job to the queue
     def self.enqueue(*args, &block)
       object = block_given? ? EvaledJob.new(&block) : args.shift
@@ -112,8 +124,9 @@ module Delayed
     
       priority = args.first || 0
       run_at   = args[1]
-
-      Job.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at)
+      qname = queue_name
+      
+      Job.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at, :queue => qname)
     end
 
     # Find a few candidate jobs to run (in case some immediately get locked by others).
@@ -124,7 +137,7 @@ module Delayed
 
       sql = NextTaskSQL.dup
 
-      conditions = [time_now, time_now - max_run_time, worker_name]
+      conditions = [queue_name, time_now, time_now - max_run_time, worker_name]
 
       if self.min_priority
         sql << ' AND (priority >= ?)'
