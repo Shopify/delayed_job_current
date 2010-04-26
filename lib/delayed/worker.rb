@@ -2,6 +2,7 @@ module Delayed
   class Worker
     SLEEP = 5
 
+    attr_reader :idle_after, :next_idle
     cattr_accessor :logger
     self.logger = if defined?(Merb::Logger)
       Merb.logger
@@ -11,6 +12,8 @@ module Delayed
 
     def initialize(options={})
       @quiet = options[:quiet]
+      @idle_after = options[:idle_after] || 1
+      @next_idle = Time.new + @idle_after.minute
       Delayed::Job.min_priority = options[:min_priority] if options.has_key?(:min_priority)
       Delayed::Job.max_priority = options[:max_priority] if options.has_key?(:max_priority)
     end
