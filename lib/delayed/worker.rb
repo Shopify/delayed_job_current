@@ -13,7 +13,6 @@ module Delayed
     def initialize(options={})
       @quiet = options[:quiet]
       @idle_after = options[:idle_after] || 1
-      @next_idle = Time.new + @idle_after.minute
       Delayed::Job.min_priority = options[:min_priority] if options.has_key?(:min_priority)
       Delayed::Job.max_priority = options[:max_priority] if options.has_key?(:max_priority)
     end
@@ -38,9 +37,15 @@ module Delayed
         if count.zero?
           sleep(SLEEP)
         else
+          @next_idle = Time.new + @idle_after.minute
           say "#{count} jobs processed at %.4f j/s, %d failed ..." % [count / realtime, result.last]
         end
-
+        
+        if Time.new > @next_idle
+          @next_idle = Time.new + @idle_after.minute
+          on_idle
+        end
+        
         break if $exit
       end
 
