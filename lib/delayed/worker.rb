@@ -19,10 +19,12 @@ module Delayed
 
     def start
       say "*** Starting job worker #{Delayed::Job.worker_name}"
-
+      
       trap('TERM') { say 'Exiting...'; $exit = true }
       trap('INT')  { say 'Exiting...'; $exit = true }
-
+      
+      @next_idle = Time.new + @idle_after.minute
+      
       loop do
         result = nil
 
@@ -56,6 +58,12 @@ module Delayed
     def say(text)
       puts text unless @quiet
       logger.info text if logger
+    end
+    
+    private
+    
+    def on_idle
+      # You may overide this callback method
     end
 
   end
