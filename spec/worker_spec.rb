@@ -43,10 +43,10 @@ describe Delayed::Worker do
   
   it "should call the on_idle method if Time.new > next_idle" do
     Delayed::Worker.class_eval "def on_idle; @test_var = true; end"
-    worker = Delayed::Worker.new
+    worker = Delayed::Worker.new(:idle_after => 0.05)
     worker_thread = Thread.new { worker.start }
     worker.instance_variable_defined?(:@test_var).should == false
-    sleep(70)
+    sleep(10)
     worker.instance_variable_defined?(:@test_var).should == true
     Thread.kill(worker_thread)
   end
