@@ -110,7 +110,7 @@ module Delayed
       unless object.respond_to?(:perform) || block_given?
         raise ArgumentError, 'Cannot enqueue items which do not respond to perform'
       end
-    
+
       options = args.first || {}
       options[:priority] ||= 0
       options[:payload_object] = object
@@ -258,7 +258,7 @@ module Delayed
     # Note: This does not ping the DB to get the time, so all your clients
     # must have syncronized clocks.
     def self.db_time_now
-      (ActiveRecord::Base.default_timezone == :utc) ? Time.now.utc : Time.zone.now
+      (ActiveRecord::Base.default_timezone == :utc) ? Time.now.utc : (Time.zone ? Time.zone.now : Time.now)
     end
 
   protected
