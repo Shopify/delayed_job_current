@@ -1,0 +1,173 @@
+1289585416
+0	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	    cattr_accessor :runs; self.runs = 0
+0	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+0	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+0	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+ActiveRecord	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	    module ActiveRecord
+Autoloaded	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/clazz.rb	module Autoloaded
+Autoloaded	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/struct.rb	module Autoloaded
+Backend	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	  module Backend
+Backend	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	  module Backend
+Base	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	class ActiveRecord::Base
+Base	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	    module Base
+CallbackJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class CallbackJob
+Class	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	class Class
+ClassMethods	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      module ClassMethods
+ClassMethods	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    module ClassMethods
+Clazz	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/clazz.rb	  class Clazz
+Command	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	  class Command
+CreateDelayedJobs	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/templates/migration.rb	class CreateDelayedJobs 
+CustomRescheduleJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class CustomRescheduleJob 
+DelayProxy	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	  class DelayProxy 
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_mailer.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/railtie.rb	module Delayed
+Delayed	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	module Delayed
+DelayedJobGenerator	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/delayed_job_generator.rb	class DelayedJobGenerator 
+DeserializationError	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	    class DeserializationError 
+ErrorJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class ErrorJob
+Fable	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	      class Fable
+Job	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	      class Job 
+LongRunningJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class LongRunningJob
+M	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	module M
+MessageSending	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	  module MessageSending
+Module	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	class Module
+ModuleJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  class ModuleJob
+MyMailer	/Users/brandon/projects/oss/delayed_job/spec/performable_mailer_spec.rb	class MyMailer 
+NamedJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class NamedJob 
+OnPermanentFailureJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class OnPermanentFailureJob 
+ParseObjectFromYaml	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      ParseObjectFromYaml =
+PerformableMailer	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_mailer.rb	  class PerformableMailer 
+PerformableMethod	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	  class PerformableMethod 
+Railtie	/Users/brandon/projects/oss/delayed_job/lib/delayed/railtie.rb	  class Railtie 
+SimpleJob	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	class SimpleJob
+Story	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	    class Story 
+Story	/Users/brandon/projects/oss/delayed_job/spec/spec_helper.rb	class Story 
+Struct	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	class Struct
+Struct	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/struct.rb	  class Struct 
+Worker	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	  class Worker
+Yarn	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	        class Yarn
+after	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def after
+after_fork	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def self.after_fork
+after_fork	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	        def after_fork
+args	/Users/brandon/projects/oss/delayed_job/lib/delayed/recipes.rb	    def args
+backend	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_reader :backend
+backend	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def self.backend
+before	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def before
+before_fork	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def self.before_fork
+before_fork	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	        def before_fork
+clear_locks!	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def self.clear_locks!
+create_job	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/shared_spec.rb	  def create_job
+create_migration_file	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/delayed_job_generator.rb	  def create_migration_file
+create_script_file	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/delayed_job_generator.rb	  def create_script_file
+daemonize	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	    def daemonize
+db_time_now	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def self.db_time_now
+default_priority	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+delay	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    def delay
+delay	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_mailer.rb	  def delay
+delay	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_mailer.rb	  def self.delay
+destroy_failed_jobs	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :destroy_failed_jobs
+display_name	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	    def display_name
+display_name	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def display_name
+down	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/templates/migration.rb	  def self.down
+enqueue	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	        def enqueue
+enqueue	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def enqueue
+error	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def error
+failed	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      alias_method :failed
+failed?	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def failed?
+failure	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def failure
+failure	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def failure
+find_available	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def self.find_available
+find_available_jobs	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def find_available_jobs
+guess_backend	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def self.guess_backend
+handle_asynchronously	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	      def handle_asynchronously
+handle_failed_job	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def handle_failed_job
+hook	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def hook
+importance	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	          attr_accessor :importance
+importance	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	          attr_accessor :importance
+included	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def self.included
+initialize	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	    def initialize
+initialize	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    def initialize
+initialize	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	    def initialize
+initialize	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def initialize
+invoke_job	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def invoke_job
+is	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/shared_spec.rb	    it "should raise a DeserializationError when the job class is 
+lock_exclusively!	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	        def lock_exclusively!
+log_queries	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+logger	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+max_attempts	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+max_priority	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+max_run_time	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+messages	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :messages
+method_missing	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    def method_missing
+method_missing	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	    def method_missing
+min_priority	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+name	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def name
+name	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/shared_spec.rb	    it "should be the class name 
+name	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def name
+name	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def name
+name_prefix	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    attr_accessor :name_prefix
+next_migration_number	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/delayed_job_generator.rb	  def self.next_migration_number
+payload_object	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def payload_object
+payload_object	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def payload_object
+perform	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_mailer.rb	    def perform
+perform	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	    def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/clazz.rb	    def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/autoloaded/struct.rb	    def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	    def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def perform
+perform	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def perform
+private_method	/Users/brandon/projects/oss/delayed_job/spec/performable_method_spec.rb	      def private_method
+rails_env	/Users/brandon/projects/oss/delayed_job/lib/delayed/recipes.rb	    def rails_env
+reschedule	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def reschedule
+reschedule_at	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def reschedule_at
+reschedule_at	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def reschedule_at
+reserve_and_run_one_job	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def reserve_and_run_one_job
+respond_to?	/Users/brandon/projects/oss/delayed_job/lib/delayed/performable_method.rb	    def respond_to?
+run	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	    def run
+run	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def run
+run_process	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	    def run_process
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	    cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	    cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+runs	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+say	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def say
+self	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	    cattr_accessor :runs; self.runs = 0
+self	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+self	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+self	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  cattr_accessor :runs; self.runs = 0
+send_at	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    def send_at
+send_later	/Users/brandon/projects/oss/delayed_job/lib/delayed/message_sending.rb	    def send_later
+set_default_run_at	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def set_default_run_at
+signup	/Users/brandon/projects/oss/delayed_job/spec/performable_mailer_spec.rb	  def signup
+sleep_delay	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time, :default_priority, :sleep_delay, :logger, :log_queries
+source_root	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/delayed_job_generator.rb	  def self.source_root
+spin	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	          def spin
+start	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def start
+success	/Users/brandon/projects/oss/delayed_job/spec/sample_jobs.rb	  def success
+tell	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	        def tell
+tell	/Users/brandon/projects/oss/delayed_job/spec/spec_helper.rb	  def tell
+tell!	/Users/brandon/projects/oss/delayed_job/spec/message_sending_spec.rb	      def tell!
+to_yaml	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	  def to_yaml
+to_yaml_properties	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	  def to_yaml_properties
+unlock	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	      def unlock
+up	/Users/brandon/projects/oss/delayed_job/lib/generators/delayed_job/templates/migration.rb	  def self.up
+whatever	/Users/brandon/projects/oss/delayed_job/spec/spec_helper.rb	  def whatever
+work_off	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/base.rb	        def work_off
+work_off	/Users/brandon/projects/oss/delayed_job/lib/delayed/worker.rb	    def work_off
+worker_count	/Users/brandon/projects/oss/delayed_job/lib/delayed/command.rb	    attr_accessor :worker_count
+yaml_new	/Users/brandon/projects/oss/delayed_job/lib/delayed/backend/active_record.rb	  def self.yaml_new
+yaml_new	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	  def self.yaml_new
+yaml_tag_read_class	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	  def self.yaml_tag_read_class
+yaml_tag_read_class	/Users/brandon/projects/oss/delayed_job/lib/delayed/yaml_ext.rb	  def yaml_tag_read_class
