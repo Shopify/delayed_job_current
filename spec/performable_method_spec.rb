@@ -38,5 +38,16 @@ describe Delayed::PerformableMethod do
     p.method.should  == :read
     p.args.should    == ["LOAD;Story;#{story.id}"]
     p.perform.should == 'Epilog: Once upon...'
-  end                 
+  end
+
+  it "should not raise NoMethodError if target method is private" do
+    clazz = Class.new do
+      def private_method
+      end
+      private :private_method
+    end
+    lambda {
+      Delayed::PerformableMethod.new(clazz.new, :private_method, [])
+    }.should_not raise_error(NoMethodError)
+  end
 end
