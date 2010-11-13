@@ -4,7 +4,7 @@ require 'rubygems'
 require 'spec'
 require 'logger'
 
-gem 'activerecord', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
+gem 'rails', '~>2.3.5'
 
 require 'delayed_job'
 require 'sample_jobs'
