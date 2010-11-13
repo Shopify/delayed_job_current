@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{delayed_job}
-  s.version = "2.0.3"
+  s.version = "2.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Keepers", "Tobias L\303\274tke"]
-  s.date = %q{2010-04-16}
+  s.date = %q{2010-11-13}
   s.description = %q{Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background. It is a direct extraction from Shopify where the job table is responsible for a multitude of core tasks.
 
 This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job).}
@@ -19,6 +19,8 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
   ]
   s.files = [
     ".gitignore",
+     ".rvmrc",
+     "CHANGELOG",
      "MIT-LICENSE",
      "README.textile",
      "Rakefile",
@@ -50,6 +52,7 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
      "spec/backend/mongo_mapper_job_spec.rb",
      "spec/backend/shared_backend_spec.rb",
      "spec/delayed_method_spec.rb",
+     "spec/message_sending_spec.rb",
      "spec/performable_method_spec.rb",
      "spec/sample_jobs.rb",
      "spec/setup/active_record.rb",
@@ -63,10 +66,11 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
   s.homepage = %q{http://github.com/collectiveidea/delayed_job}
   s.rdoc_options = ["--main", "README.textile", "--inline-source", "--line-numbers"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Database-backed asynchronous priority queue system -- Extracted from Shopify}
   s.test_files = [
     "spec/delayed_method_spec.rb",
+     "spec/message_sending_spec.rb",
      "spec/performable_method_spec.rb",
      "spec/story_spec.rb",
      "spec/worker_spec.rb"
@@ -76,7 +80,7 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<daemons>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
