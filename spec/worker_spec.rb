@@ -104,6 +104,7 @@ describe Delayed::Worker do
           # reset defaults
           Delayed::Worker.destroy_failed_jobs = true
           Delayed::Worker.max_attempts = 25
+          Delayed::Job.delete_all
 
           @job = Delayed::Job.enqueue ErrorJob.new
         end
@@ -120,13 +121,15 @@ describe Delayed::Worker do
         end
     
         it "should re-schedule jobs after failing" do
-          @worker.run(@job)
+          @worker.work_off
           @job.reload
           @job.last_error.should =~ /did not work/
           @job.last_error.should =~ /sample_jobs.rb:8:in `perform'/
           @job.attempts.should == 1
           @job.run_at.should > Delayed::Job.db_time_now - 10.minutes
           @job.run_at.should < Delayed::Job.db_time_now + 10.minutes
+          @job.locked_at.should be_nil
+          @job.locked_by.should be_nil
         end
       end
   
