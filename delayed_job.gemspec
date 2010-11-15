@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Keepers", "Tobias L\303\274tke"]
-  s.date = %q{2010-11-13}
+  s.date = %q{2010-11-14}
   s.description = %q{Delayed_job (or DJ) encapsulates the common pattern of asynchronously executing longer tasks in the background. It is a direct extraction from Shopify where the job table is responsible for a multitude of core tasks.
 
 This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job).}
