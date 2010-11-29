@@ -173,6 +173,46 @@ shared_examples_for 'a backend' do
     end
   end
 
+  describe "reserve" do
+    before do
+      Delayed::Worker.max_run_time = 2.minutes
+      @worker = Delayed::Worker.new(:quiet => true)
+    end
+
+    it "should not reserve failed jobs" do
+      create_job :attempts => 50, :failed_at => described_class.db_time_now
+      described_class.reserve(@worker).should be_nil
+    end
+
+    it "should not reserve jobs scheduled for the future" do
+      create_job :run_at => (described_class.db_time_now + 1.minute)
+      described_class.reserve(@worker).should be_nil
+    end
+
+    it "should lock the job so other workers can't reserve it" do
+      job = create_job
+      described_class.reserve(@worker).should == job
+      new_worker = Delayed::Worker.new(:quiet => true)
+      new_worker.name = 'worker2'
+      described_class.reserve(new_worker).should be_nil
+    end
+
+    it "should reserve open jobs" do
+      job = create_job
+      described_class.reserve(@worker).should == job
+    end
+
+    it "should reserve expired jobs" do
+      job = create_job(:locked_by => @worker.name, :locked_at => described_class.db_time_now - 3.minutes)
+      described_class.reserve(@worker).should == job
+    end
+
+    it "should reserve own jobs" do
+      job = create_job(:locked_by => @worker.name, :locked_at => (described_class.db_time_now - 1.minutes))
+      described_class.reserve(@worker).should == job
+    end
+  end
+  
   context "#name" do
     it "should be the class name of the job that was enqueued" do
       @backend.create(:payload_object => ErrorJob.new ).name.should == 'ErrorJob'
