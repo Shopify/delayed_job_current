@@ -131,6 +131,24 @@ describe Delayed::Worker do
           @job.locked_at.should be_nil
           @job.locked_by.should be_nil
         end
+        
+        context "when the job's payload implements #reschedule_at" do
+          before(:each) do
+            @reschedule_at = Time.current + 7.hours
+            @job.payload_object.stub!(:reschedule_at).and_return(@reschedule_at)
+          end
+
+          it 'should invoke the strategy to re-schedule' do
+            @job.payload_object.should_receive(:reschedule_at) do |time, attempts|
+              (Delayed::Job.db_time_now - time).should < 2
+              attempts.should == 1
+
+              Delayed::Job.db_time_now + 5
+            end
+
+            @worker.run(@job)
+          end
+        end
       end
   
       context "reschedule" do

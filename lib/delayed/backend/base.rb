@@ -71,6 +71,12 @@ module Delayed
         self.locked_at    = nil
         self.locked_by    = nil
       end
+    
+      def reschedule_at
+        payload_object.respond_to?(:reschedule_at) ? 
+          payload_object.reschedule_at(self.class.db_time_now, attempts) :
+          self.class.db_time_now + (attempts ** 4) + 5
+      end
       
     private
 
@@ -99,13 +105,13 @@ module Delayed
       def attempt_to_load(klass)
          klass.constantize
       end
-
+      
     protected
 
       def set_default_run_at
         self.run_at ||= self.class.db_time_now
-      end
-    
+      end    
+
     end
   end
 end
