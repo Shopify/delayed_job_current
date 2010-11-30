@@ -15,6 +15,7 @@ end
 class OnPermanentFailureJob < SimpleJob
   def on_permanent_failure
   end
+  def max_attempts; 1; end
 end
 
 module M

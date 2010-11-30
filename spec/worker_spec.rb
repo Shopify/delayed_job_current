@@ -165,7 +165,7 @@ describe Delayed::Worker do
 
             it "should run that hook" do
               @job.payload_object.should_receive :on_permanent_failure
-              Delayed::Worker.max_attempts.times { @worker.reschedule(@job) }
+              @worker.reschedule(@job)
             end
           end
 

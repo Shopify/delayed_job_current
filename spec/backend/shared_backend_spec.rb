@@ -299,4 +299,19 @@ shared_examples_for 'a backend' do
       @job.id.should_not be_nil
     end
   end
+  
+  context "max_attempts" do
+    before(:each) do
+      @job = described_class.enqueue SimpleJob.new
+    end
+    
+    it 'should not be defined' do
+      @job.max_attempts.should be_nil
+    end
+    
+    it 'should use the max_retries value on the payload when defined' do
+      @job.payload_object.stub!(:max_attempts).and_return(99)
+      @job.max_attempts.should == 99
+    end 
+  end
 end

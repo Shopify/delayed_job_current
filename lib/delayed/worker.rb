@@ -132,7 +132,7 @@ module Delayed
     # Reschedule the job in the future (when a job fails).
     # Uses an exponential scale depending on the number of failed attempts.
     def reschedule(job, time = nil)
-      if (job.attempts += 1) < self.class.max_attempts
+      if (job.attempts += 1) < max_attempts(job)
         job.run_at = time || job.reschedule_at
         job.unlock
         job.save!
@@ -154,6 +154,10 @@ module Delayed
       logger.add level, "#{Time.now.strftime('%FT%T%z')}: #{text}" if logger
     end
 
+    def max_attempts(job)
+      job.max_attempts || self.class.max_attempts
+    end
+    
   protected
     
     def handle_failed_job(job, error)
