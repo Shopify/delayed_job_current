@@ -19,13 +19,14 @@ This version is for Rails 2.x only.  For rails 3 support, install delayed_job 2.
 To install as a gem, add the following to @config/environment.rb@:
 
 <pre>
-config.gem 'delayed_job', :version => "= 2.0.4"
+config.gem 'delayed_job', :version => '~>2.0.4'
 </pre>
 
 Rake tasks are not automatically loaded from gems, so you'll need to add the following to your Rakefile:
 
 <pre>
 begin
+  gem 'delayed_job', '~>2.0.4'
   require 'delayed/tasks'
 rescue LoadError
   STDERR.puts "Run `rake gems:install` to install delayed_job"
@@ -35,7 +36,7 @@ end
 To install as a plugin:
 
 <pre>
-script/plugin install git://github.com/collectiveidea/delayed_job.git -r v2.0 
+script/plugin install git://github.com/collectiveidea/delayed_job.git -r v2.0
 </pre>
 
 After delayed_job is installed, you will need to setup the backend.
