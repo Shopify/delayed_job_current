@@ -20,7 +20,15 @@ module Delayed
           run_at   = args[1]
           self.create(:payload_object => object, :priority => priority.to_i, :run_at => run_at)
         end
-        
+
+        def reserve(worker, max_run_time = Worker.max_run_time)
+          # We get up to 5 jobs from the db. In case we cannot get exclusive access to a job we try the next.
+          # this leads to a more even distribution of jobs across the worker processes
+          find_available(worker.name, 5, max_run_time).detect do |job|
+            job.lock_exclusively!(max_run_time, worker.name)
+          end
+        end
+
         # Hook method that is called before a new worker is forked
         def before_fork
         end
