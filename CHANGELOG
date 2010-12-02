@@ -1,3 +1,6 @@
+2.0.6 - unreleased
+* Revert worker contention fix due to regressions
+
 2.0.5 - 2010-12-01
 * Added #reschedule_at hook on payload to determine when the job should be rescheduled [backported from 2.1]
 * Added --sleep-delay command line option [backported from 2.1]
