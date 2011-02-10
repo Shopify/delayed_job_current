@@ -25,7 +25,7 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
   s.add_development_dependency  'rails',          '~> 2.3'
   s.add_development_dependency  'sqlite3'
   s.add_development_dependency  'mysql'
-  s.add_development_dependency  'mongo_mapper'
+  s.add_development_dependency  'mongo_mapper',   '~> 0.8.0'
   s.add_development_dependency  'dm-core'
   s.add_development_dependency  'dm-observer'
   s.add_development_dependency  'dm-aggregates'

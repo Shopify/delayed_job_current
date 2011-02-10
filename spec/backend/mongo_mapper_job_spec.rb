@@ -69,7 +69,7 @@ describe Delayed::Backend::MongoMapper::Job do
 
   describe "before_fork" do
     after do
-      MongoMapper.connection.connect_to_master
+      MongoMapper.connection.connect
     end
 
     it "should disconnect" do
