@@ -21,7 +21,7 @@ This gem is collectiveidea's fork (http://github.com/collectiveidea/delayed_job)
   s.add_runtime_dependency      'activesupport',  '~> 2.0'
 
   s.add_development_dependency  'rspec',          '~> 1.0'
-  s.add_development_dependency  'rake'
+  s.add_development_dependency  'rake',           '0.8.7' #~>0.8 still resulted in 0.9 being used on bundler 1.0.10
   s.add_development_dependency  'rails',          '~> 2.3'
   s.add_development_dependency  'sqlite3'
   s.add_development_dependency  'mysql'
