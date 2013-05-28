@@ -1,4 +1,4 @@
-2.0.8 - Unreleased
+2.0.8 - 2013-05-28
 * Backport fix for deserialization errors that bring down the daemon
 
 2.0.7 - 2011-02-10
